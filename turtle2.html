@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>부드럽게 움직이는 바다 거북이</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    body {
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #4FC3F7, #01579B);
+      height: 100vh;
+      user-select: none;
+    }
+    .background {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .turtle {
+      position: absolute;
+      width: 90px; /* 크기 조정 (120px -> 90px) */
+      height: 90px; /* 크기 조정 (120px -> 90px) */
+      left: 200px;
+      /* top 값은 JS에서 설정됨 */
+      cursor: pointer;
+      user-select: none;
+      /* 시각적 디버깅을 위해 윤곽선 추가 (개발 중에만 사용) */
+      /* border: 1px solid red; */
+    }
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .body {
+      width: 90px;
+      height: 90px;
+      background-color: #7ed87e;
+      left: 0;
+      top: 0;
+      transition: background-color 0.3s;
+    }
+    .head {
+      width: 33.75px;
+      height: 33.75px;
+      background-color: #388E3C;
+      top: -27.75px;
+      left: 28.125px;
+      transition: background-color 0.3s;
+    }
+    .eye-white {
+      width: 6.75px;
+      height: 6.75px;
+      background-color: white;
+      top: 5.25px;
+    }
+    .eye-black {
+      width: 3px;
+      height: 3px;
+      background-color: black;
+      top: 1.875px;
+      left: 1.875px;
+    }
+    .eye-left { left: 5.25px; }
+    .eye-right { right: 5.25px; }
+
+    .leg {
+      width: 22.5px;
+      height: 22.5px;
+      background-color: #388E3C;
+      transform-origin: center;
+      transition: background-color 0.3s;
+    }
+    .leg1 {
+      top: 11.25px;
+      left: -11.25px;
+      animation: flap1 1.6s ease-in-out infinite;
+    }
+    .leg2 {
+      top: 11.25px;
+      left: 78.75px;
+      animation: flap2 1.6s ease-in-out infinite;
+    }
+    .leg3 {
+      top: 56.25px;
+      left: -11.25px;
+      animation: flap1 1.6s ease-in-out infinite;
+    }
+    .leg4 {
+      top: 56.25px;
+      left: 78.75px;
+      animation: flap2 1.6s ease-in-out infinite;
+    }
+    @keyframes flap1 {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-30deg); }
+    }
+    @keyframes flap2 {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(30deg); }
+    }
+    .tail {
+      width: 11.25px;
+      height: 11.25px;
+      background-color: #388E3C;
+      top: 84.375px;
+      left: 39.375px;
+      transition: background-color 0.3s;
+    }
+    .bubble {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: rise 6s linear infinite;
+    }
+    @keyframes rise {
+      0% { bottom: -20px; opacity: 0; transform: translateX(0); }
+      50% { opacity: 1; }
+      100% { bottom: 100vh; transform: translateX(30px); opacity: 0; }
+    }
+    .trash {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #8e8e8e;
+      border-radius: 3px;
+      opacity: 0.8;
+    }
+    .fish {
+      position: absolute;
+      width: 25px;
+      height: 15px;
+      background: orange;
+      border-radius: 50%;
+      opacity: 0.9;
+    }
+    .scoreboard {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      color: #ffeb3b;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
+      z-index: 1000;
+    }
+    .timer {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      text-shadow: 0 0 5px #000;
+    }
+    .game-over {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 30px;
+      border-radius: 20px;
+      display: none;
+      z-index: 1001;
+      text-align: center;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="background">
+    <div class="bubble" style="left: 50px; animation-delay: 0s;"></div>
+    <div class="bubble" style="left: 150px; animation-delay: 1s;"></div>
+    <div class="bubble" style="left: 300px; animation-delay: 2.5s;"></div>
+    <div class="bubble" style="left: 400px; animation-delay: 4s;"></div>
+
+    <div class="turtle" id="turtle">
+      <div class="circle body"></div>
+      <div class="circle head">
+        <div class="circle eye-white eye-left">
+          <div class="circle eye-black"></div>
+        </div>
+        <div class="circle eye-white eye-right">
+          <div class="circle eye-black"></div>
+        </div>
+      </div>
+      <div class="circle leg leg1"></div>
+      <div class="circle leg leg2"></div>
+      <div class="circle leg leg3"></div>
+      <div class="circle leg leg4"></div>
+      <div class="circle tail"></div>
+    </div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard">❤️❤️❤️ 점수: 0</div>
+  <div class="timer" id="timer">거북스딱스 수명: 0초</div>
+  <div class="game-over" id="gameOver">게임 종료\n거북스딱스 수명: 0초\n최종 점수: 0점\n화면을 클릭하면 다시 시작합니다</div>
+
+<script>
+  const turtle = document.getElementById("turtle");
+  const body = turtle.querySelector(".body");
+  const head = turtle.querySelector(".head");
+  const legs = turtle.querySelectorAll(".leg");
+  const tail = turtle.querySelector(".tail");
+  const scoreboardEl = document.getElementById("scoreboard");
+  const gameOverEl = document.getElementById("gameOver");
+  const timerDisplay = document.getElementById("timer");
+  const backgroundEl = document.querySelector(".background");
+
+  // --- 게임 상수 ---
+  const INITIAL_TURTLE_X = 200;
+  // INITIAL_TURTLE_Y는 이제 동적으로 계산됨
+  const TURTLE_BASE_SPEED_PPS = 280; // 거북이 속도 약간 증가
+  const INITIAL_HEARTS = 3;
+  const SCORE_PER_FISH = 10;
+  const HEART_RESTORE_SCORE_INTERVAL = 300; 
+  const TURTLE_BOTTOM_MARGIN = 10; // 거북이와 화면 하단 사이의 여백
+
+  const ITEM_BASE_SPEED_PPS = 100;
+  const ITEM_SPEED_INCREMENT_PPS = 10; // 모든 아이템에 적용되는 기본 속도 증가량
+  const TURTLE_SPEED_INCREMENT_PPS = 15;
+
+  const ITEM_CREATION_INTERVAL_MS = 700; 
+  const INITIAL_FISH_PROBABILITY = 0.35; // 변경: 0.25 -> 0.35 (초기 새우 등장 확률 증가)
+  const MIN_FISH_PROBABILITY = 0.10; // 변경: 0.05 -> 0.10 (최소 새우 등장 확률 증가)
+  const FISH_PROBABILITY_DECREMENT_PER_DIFFICULTY_INCREASE = 0.04; // 변경: 0.05 -> 0.04 (새우 확률 감소폭 완화)
+
+  const TRASH_EXTRA_SPEED_INCREMENT_PPS = 7; // 난이도 증가당 쓰레기 추가 속도 증가량
+
+  const DIFFICULTY_INCREASE_INTERVAL_MS = 7000;
+  const HIT_COLOR_DURATION_MS = 500;
+
+  const TURTLE_BODY_NORMAL_COLOR = "#7ed87e";
+  const TURTLE_ACCENT_NORMAL_COLOR = "#388E3C";
+  const TURTLE_BODY_HIT_COLOR = "#e74c3c";
+  const TURTLE_ACCENT_HIT_COLOR = "#b22222";
+  // --- End Game Constants ---
+
+  let turtleX, turtleYFixed; 
+  let currentTurtleSpeed, currentItemFallSpeedPps, hearts, score;
+  let gameStartTime, gameEnded;
+  let lastFrameTime = null;
+  let resetColorTimeoutId = null;
+  let itemCreationIntervalId = null;
+  let difficultyIncreaseIntervalId = null;
+  let nextHeartRestoreScore;
+  let currentFishProbability; 
+  let trashExtraSpeedPps; 
+
+  const keys = {
+    ArrowLeft: false, ArrowRight: false,
+  };
+
+  function applyTurtleColors(bodyColor, accentColor) {
+    body.style.backgroundColor = bodyColor;
+    head.style.backgroundColor = accentColor;
+    tail.style.backgroundColor = accentColor;
+    legs.forEach(leg => { leg.style.backgroundColor = accentColor; });
+  }
+
+  function showTurtleHitColor() {
+    applyTurtleColors(TURTLE_BODY_HIT_COLOR, TURTLE_ACCENT_HIT_COLOR);
+  }
+
+  function resetTurtleDefaultColor() {
+    applyTurtleColors(TURTLE_BODY_NORMAL_COLOR, TURTLE_ACCENT_NORMAL_COLOR);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (gameEnded) return;
+    if (keys.hasOwnProperty(e.key)) { 
+      e.preventDefault();
+      keys[e.key] = true;
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault(); 
+    }
+  });
+  window.addEventListener("keyup", (e) => {
+    if (keys.hasOwnProperty(e.key)) {
+      e.preventDefault();
+      keys[e.key] = false;
+    }
+  });
+
+  function checkCollision(element1, element2) {
+    const rect1 = element1.getBoundingClientRect();
+    const rect2 = element2.getBoundingClientRect();
+    return !(
+      rect1.right < rect2.left ||
+      rect1.left > rect2.right ||
+      rect1.bottom < rect2.top ||
+      rect1.top > rect2.bottom
+    );
+  }
+
+  function createFallingItem(type) {
+    if (gameEnded) return;
+
+    const item = document.createElement("div");
+    item.classList.add(type);
+    item.style.left = Math.random() * (window.innerWidth - (type === 'fish' ? 25 : 20)) + "px";
+    item.style.top = "-30px";
+    backgroundEl.appendChild(item);
+
+    let itemY = -30;
+    let itemLastFrameTime = performance.now();
+
+    function fallLoop(currentTime) {
+      if (gameEnded && item.parentElement) {
+        item.remove();
+        return;
+      }
+      if (!item.parentElement) return;
+
+      const deltaTime = (currentTime - itemLastFrameTime) / 1000;
+      itemLastFrameTime = currentTime;
+
+      let effectiveFallSpeed = currentItemFallSpeedPps;
+      if (type === 'trash') {
+        effectiveFallSpeed += trashExtraSpeedPps;
+      }
+
+      itemY += effectiveFallSpeed * deltaTime;
+      item.style.top = itemY + "px";
+
+      if (checkCollision(turtle, item)) {
+        if (type === 'trash') {
+          showTurtleHitColor();
+          clearTimeout(resetColorTimeoutId);
+          resetColorTimeoutId = setTimeout(resetTurtleDefaultColor, HIT_COLOR_DURATION_MS);
+          
+          hearts--;
+          updateScoreboard();
+          if (hearts <= 0) endGame();
+        } else if (type === 'fish') {
+          score += SCORE_PER_FISH;
+          
+          if (hearts < INITIAL_HEARTS && score >= nextHeartRestoreScore) {
+            hearts++;
+            nextHeartRestoreScore += HEART_RESTORE_SCORE_INTERVAL;
+            console.log(`하트 회복! 현재 하트: ${hearts}, 다음 회복 목표 점수: ${nextHeartRestoreScore}`);
+          }
+          updateScoreboard();
+        }
+        item.remove();
+        return;
+      }
+
+      if (itemY < window.innerHeight) {
+        requestAnimationFrame(fallLoop);
+      } else {
+        item.remove();
+      }
+    }
+    requestAnimationFrame(fallLoop);
+  }
+  
+  function createRandomItem() {
+    if (gameEnded) return;
+    if (Math.random() < currentFishProbability) { 
+      createFallingItem('fish');
+    } else {
+      createFallingItem('trash');
+    }
+  }
+
+  function updateScoreboard() {
+    scoreboardEl.textContent = `${hearts > 0 ? "❤️".repeat(hearts) : "💔"} 점수: ${score}`;
+  }
+
+  function endGame() {
+    gameEnded = true;
+    clearTimeout(resetColorTimeoutId);
+    clearInterval(itemCreationIntervalId);
+    clearInterval(difficultyIncreaseIntervalId);
+
+    scoreboardEl.style.display = "none";
+    timerDisplay.style.display = "none";
+    const secondsSurvived = Math.floor((Date.now() - gameStartTime) / 1000);
+    gameOverEl.textContent = `게임 종료\n거북스딱스 수명: ${secondsSurvived}초\n최종 점수: ${score}점\n화면을 클릭하면 다시 시작합니다`;
+    gameOverEl.style.display = "block";
+  }
+
+  function increaseDifficulty() {
+    if (gameEnded) return;
+    currentTurtleSpeed += TURTLE_SPEED_INCREMENT_PPS;
+    currentItemFallSpeedPps += ITEM_SPEED_INCREMENT_PPS; 
+
+    currentFishProbability = Math.max(MIN_FISH_PROBABILITY, currentFishProbability - FISH_PROBABILITY_DECREMENT_PER_DIFFICULTY_INCREASE);
+    
+    trashExtraSpeedPps += TRASH_EXTRA_SPEED_INCREMENT_PPS;
+
+    console.log(`난이도 상승! 거북이 속도: ${currentTurtleSpeed.toFixed(1)}, 아이템 기본 속도: ${currentItemFallSpeedPps.toFixed(1)}, 물고기 확률: ${currentFishProbability.toFixed(2)}, 쓰레기 추가 속도: ${trashExtraSpeedPps.toFixed(1)}`);
+  }
+
+  function gameLoop(currentTime) {
+    if (gameEnded) return;
+    
+    if (lastFrameTime === null) lastFrameTime = currentTime;
+    let deltaTime = (currentTime - lastFrameTime) / 1000;
+    lastFrameTime = currentTime;
+
+    let dx = 0;
+    if (keys.ArrowLeft) dx -= 1;
+    if (keys.ArrowRight) dx += 1;
+
+    turtleX += dx * currentTurtleSpeed * deltaTime;
+    turtleX = Math.min(window.innerWidth - turtle.clientWidth, Math.max(0, turtleX));
+    turtle.style.left = turtleX + "px";
+
+    let secondsPassed = Math.floor((Date.now() - gameStartTime) / 1000);
+    timerDisplay.textContent = `거북스딱스 수명: ${secondsPassed}초`;
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  function startGame() {
+    turtleX = INITIAL_TURTLE_X;
+    turtleYFixed = window.innerHeight - turtle.clientHeight - TURTLE_BOTTOM_MARGIN;
+    
+    currentTurtleSpeed = TURTLE_BASE_SPEED_PPS;
+    currentItemFallSpeedPps = ITEM_BASE_SPEED_PPS;
+    hearts = INITIAL_HEARTS;
+    score = 0;
+    nextHeartRestoreScore = HEART_RESTORE_SCORE_INTERVAL;
+    
+    currentFishProbability = INITIAL_FISH_PROBABILITY; 
+    trashExtraSpeedPps = 0; 
+    
+    gameEnded = false;
+    gameStartTime = Date.now();
+    lastFrameTime = null;
+
+    turtle.style.left = turtleX + "px";
+    turtle.style.top = turtleYFixed + "px"; 
+    
+    updateScoreboard();
+    resetTurtleDefaultColor();
+
+    scoreboardEl.style.display = "block";
+    timerDisplay.style.display = "block";
+    gameOverEl.style.display = "none";
+    
+    document.querySelectorAll(".trash, .fish").forEach(el => el.remove());
+
+    itemCreationIntervalId = setInterval(createRandomItem, ITEM_CREATION_INTERVAL_MS);
+    difficultyIncreaseIntervalId = setInterval(increaseDifficulty, DIFFICULTY_INCREASE_INTERVAL_MS);
+    
+    requestAnimationFrame(gameLoop);
+  }
+
+  window.addEventListener('resize', () => {
+    if (!gameEnded) {
+        turtleYFixed = window.innerHeight - turtle.clientHeight - TURTLE_BOTTOM_MARGIN;
+        turtle.style.top = turtleYFixed + "px";
+    }
+  });
+
+  document.addEventListener("click", () => {
+    if (gameEnded && gameOverEl.style.display === 'block') {
+        startGame();
+    }
+  });
+  
+  startGame();
+</script>
+</body>
+</html>
