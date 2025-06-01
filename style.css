@@ -1,0 +1,162 @@
+body {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  user-select: none;
+}
+.background {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+.turtle {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  left: 200px;
+  top: 400px;
+  cursor: pointer;
+  user-select: none;
+}
+.circle {
+  position: absolute;
+  border-radius: 50%;
+}
+.body {
+  width: 120px;
+  height: 120px;
+  background-color: #7ed87e;
+  left: 0;
+  top: 0;
+  transition: background-color 0.3s;
+}
+.head {
+  width: 45px;
+  height: 45px;
+  background-color: #388E3C;
+  top: -37px;
+  left: 37px;
+  transition: background-color 0.3s;
+}
+.eye-white {
+  width: 9px;
+  height: 9px;
+  background-color: white;
+  top: 7px;
+}
+.eye-black {
+  width: 4px;
+  height: 4px;
+  background-color: black;
+  top: 2.5px;
+  left: 2.5px;
+}
+.eye-left {
+  left: 7px;
+}
+.eye-right {
+  right: 7px;
+}
+.leg {
+  width: 30px;
+  height: 30px;
+  background-color: #388E3C;
+  transform-origin: center;
+  transition: background-color 0.3s;
+}
+.leg1 {
+  top: 15px;
+  left: -15px;
+  animation: flap1 1.6s ease-in-out infinite;
+}
+.leg2 {
+  top: 15px;
+  left: 110px;
+  animation: flap2 1.6s ease-in-out infinite;
+}
+.leg3 {
+  top: 75px;
+  left: -15px;
+  animation: flap1 1.6s ease-in-out infinite;
+}
+.leg4 {
+  top: 75px;
+  left: 110px;
+  animation: flap2 1.6s ease-in-out infinite;
+}
+@keyframes flap1 {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-30deg); }
+}
+@keyframes flap2 {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(30deg); }
+}
+.tail {
+  width: 15px;
+  height: 15px;
+  background-color: #388E3C;
+  top: 100px;
+  left: 53px;
+  transition: background-color 0.3s;
+}
+.bubble {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: rise 6s linear infinite;
+}
+@keyframes rise {
+  0% { bottom: -20px; opacity: 0; transform: translateX(0); }
+  50% { opacity: 1; }
+  100% { bottom: 100vh; transform: translateX(30px); opacity: 0; }
+}
+.trash {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #8e8e8e;
+  border-radius: 3px;
+  opacity: 0.7;
+}
+.scoreboard {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 30px;
+  color: #ff4d4d;
+  z-index: 1000;
+}
+.timer {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+  z-index: 1000;
+  text-shadow: 0 0 5px #000;
+}
+.game-over {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 20px;
+  display: none;
+  z-index: 1001;
+  text-align: center;
+  white-space: pre-line;
+}
