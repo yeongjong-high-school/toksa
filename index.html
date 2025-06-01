@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>부드럽게 움직이는 바다 거북이</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background">
+    <div class="bubble" style="left: 50px; animation-delay: 0s;"></div>
+    <div class="bubble" style="left: 150px; animation-delay: 1s;"></div>
+    <div class="bubble" style="left: 300px; animation-delay: 2.5s;"></div>
+    <div class="bubble" style="left: 400px; animation-delay: 4s;"></div>
+
+    <div class="turtle" id="turtle">
+      <div class="circle body"></div>
+      <div class="circle head">
+        <div class="circle eye-white eye-left">
+          <div class="circle eye-black"></div>
+        </div>
+        <div class="circle eye-white eye-right">
+          <div class="circle eye-black"></div>
+        </div>
+      </div>
+      <div class="circle leg leg1"></div>
+      <div class="circle leg leg2"></div>
+      <div class="circle leg leg3"></div>
+      <div class="circle leg leg4"></div>
+      <div class="circle tail"></div>
+    </div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard">❤️❤️❤️</div>
+  <div class="timer" id="timer">거북스딱스 수명: 0초</div>
+  <div class="game-over" id="gameOver">게임 종료\n거북스딱스 수명: 0초\n화면을 클릭하면 다시 시작합니다</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
