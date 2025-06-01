@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>곰국이의 숲 속 모험</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #228B22; 
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative; 
+    }
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDUwIDgwIj48ZyBmaWxsPSIjM0FCODAwIj48cGF0aCBkPSJNMjUgMEwzMCA1MEwxNSA1MFoyNSIvPjxwYXRoIGQ9Ik0yNSAwTDQ1IDIwTDQwIDUwTDMwIDUwWiIvPjxwYXRoIGQ9Ik0yNSAwTDUgMjBMMTAgNTBMMjAgNTBaIi8+PHJlY3QgeD0iMjIiIHk9IjUwIiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iIzZCNTQzMSIvPjwvZz48L3N2Zz4=');
+        background-repeat: repeat;
+        background-size: 70px 100px;
+        opacity: 0.2;
+        z-index: -1;
+    }
+
+    #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+    }
+    #game {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      user-select: none;
+    }
+    .bear {
+      width: 50px;
+      height: 50px;
+      background: #8B4513;
+      border-radius: 50%;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      will-change: transform, left, top, width, height, opacity;
+      transition: width 0.5s ease, height 0.5s ease, opacity 0.3s ease, transform 0.1s ease-out; /* transform transition 더 빠르게 */
+    }
+    .bear::before, .bear::after {
+      content: "";
+      position: absolute;
+      width: 35%;
+      height: 35%;
+      background: #A0522D;
+      border-radius: 50%;
+      top: -10%;
+      z-index: -1;
+    }
+    .bear::before { left: 5%; transform: rotate(-15deg); }
+    .bear::after { right: 5%; transform: rotate(15deg); }
+    .eye {
+      position: absolute;
+      width: 18%;
+      height: 18%;
+      background: white;
+      border-radius: 50%;
+      top: 30%;
+      z-index: 1;
+    }
+    .eye.left { left: 25%; }
+    .eye.right { right: 25%; }
+    .eye::after {
+      content: "";
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background: black;
+      border-radius: 50%;
+      top: 25%;
+      left: 25%;
+    }
+    .nose {
+      position: absolute;
+      width: 25%;
+      height: 20%;
+      background: black;
+      border-radius: 50% / 70% 70% 30% 30%;
+      bottom: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    .salmon {
+      width: 30px;
+      height: 20px;
+      background: #FA8072;
+      border-radius: 50% 30% / 60% 60%;
+      position: absolute;
+      transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+      opacity: 1;
+      z-index: 3;
+    }
+    .salmon::after {
+      content: "";
+      position: absolute;
+      width: 60%;
+      height: 90%;
+      background: #FFA07A;
+      right: -35%;
+      top: 5%;
+      border-radius: 0 50% 50% 0 / 0 30% 30% 0;
+      transform: rotate(-10deg);
+      transform-origin: left center;
+      z-index: -1;
+    }
+
+    .tiger {
+      width: 70px;
+      height: 45px;
+      background: orange;
+      border-radius: 40% 40% 20px 20px / 60% 60% 30px 30px;
+      position: absolute;
+      z-index: 4;
+      transition: transform 0.3s ease;
+      will-change: transform, left, top;
+    }
+    .tiger .stripe {
+        position: absolute;
+        background-color: black;
+        height: 80%;
+        width: 8px;
+        border-radius: 4px;
+        top: 10%;
+    }
+    .tiger .stripe1 { left: 20%; }
+    .tiger .stripe2 { left: 40%; }
+    .tiger .stripe3 { left: 60%; }
+    .tiger .tiger-head {
+        position: absolute;
+        width: 35px;
+        height: 35px;
+        background: #FF8C00;
+        border-radius: 50%;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+     .tiger .tiger-head::before, .tiger .tiger-head::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #D2691E;
+        border-radius: 50%;
+        top: -3px;
+    }
+    .tiger .tiger-head::before { left: 3px; }
+    .tiger .tiger-head::after { right: 3px; }
+    .tiger .tiger-eye {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: black;
+        border-radius: 50%;
+        top: 10px;
+    }
+    .tiger .tiger-eye.left { left: 8px; }
+    .tiger .tiger-eye.right { right: 8px; }
+
+
+    #ui-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      box-sizing: border-box;
+      z-index: 100;
+    }
+    #score {
+      font-size: 28px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      transition: transform 0.15s ease-out;
+    }
+    #timer {
+      font-size: 28px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+
+    #message-center {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 101;
+    }
+    #statusText {
+      font-size: 48px;
+      color: #FFD700;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px 50px;
+      border-radius: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      display: none;
+      margin-bottom: 20px;
+    }
+    #restartButton {
+      padding: 15px 30px;
+      font-size: 22px;
+      background-color: #90EE90;
+      color: #006400;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      display: none;
+    }
+    #restartButton:hover { background-color: #32CD32; }
+    #restartButton:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="ui-top">
+      <div id="score">먹은 연어 수: 0</div>
+      <div id="timer">곰국이의 수명: 0분 0초</div>
+    </div>
+    <div id="game">
+      <div class="bear" id="bear">
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+        <span class="nose"></span>
+      </div>
+    </div>
+    <div id="message-center">
+        <div id="statusText"></div>
+        <button id="restartButton">다시 시작</button>
+    </div>
+  </div>
+
+  <script>
+    const gameContainer = document.getElementById("game-container");
+    const game = document.getElementById("game");
+    const bear = document.getElementById("bear");
+    const scoreText = document.getElementById("score");
+    const timerText = document.getElementById("timer");
+    const statusText = document.getElementById("statusText");
+    const restartButton = document.getElementById("restartButton");
+
+    // 곰 설정
+    const BEAR_INITIAL_SIZE = 50;
+    const BEAR_INITIAL_SPEED_FACTOR = 0.35; // 변경: 곰 속도 대폭 증가
+    const BEAR_BASE_MOVE_AMOUNT = 12;    // 변경: 곰 기본 이동 단위 증가
+    const BEAR_MID_SIZE = 70;
+    const BEAR_LARGE_SIZE = 100;
+    let currentBearSpeedFactor = BEAR_INITIAL_SPEED_FACTOR;
+
+
+    // 연어 설정
+    const SALMON_WIDTH = 30;
+    const SALMON_HEIGHT = 20;
+    const SALMON_CREATION_INTERVAL = 1800;
+    const MAX_SALMONS = 15;
+
+    // 호랑이 설정
+    const TIGER_WIDTH = 70;
+    const TIGER_HEIGHT = 45;
+    const TIGER_SPEED = 2.5; // 변경: 호랑이 속도 감소
+    const TIGER_APPEAR_DELAY = 10000; // 변경: 10초 후 등장
+    const TIGER_CHASE_LERP_FACTOR = 0.025; // 변경: 호랑이 추격 반응 조금 더 부드럽게
+
+    // 승리 및 성장 조건
+    const SCORE_TO_MID = 30;
+    const SCORE_TO_LARGE = 70;
+    const SCORE_TO_WIN = 100;
+
+    let bearX, bearY, bearTargetX, bearTargetY, currentBearSize;
+    let score;
+    let gameActive = false;
+    let startTime, timerInterval, animationFrameId;
+    let salmonInterval, tigerAppearTimeout;
+    let tigers = [];
+    let lastBearOrientation = 1;
+
+
+    const eatSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVcVTwL/+//+//8AAAAA//8BACAA//8BACAAAP/+AgIA/v4CAgAAAP/+AgIA//4CAP/+AgIA/v4CAP7+AgIA//4CAP/+AgD+/gIA/v4CAAD//gIA//4BAP7+AgD+/gEAAAAA//4CAP/+AQAAAP7+AgD+/gIA//8BAAAA//4BAAD+/gEAAAAA//4BAAD+/gIA//8BAAAA//4BAAD+/gEAAAAA//4CAAD+/gIAAAAA//8BAAD+/gEAAAAA//4BAAD+/gIAAAAA//4BAAD+/gIAAAAA//8BAP7+AgAAAAAA//4BAAD+/gEAAAAA');
+    const levelUpSound = new Audio('data:audio/wav;base64,UklGRkBvT19XQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTRvT18BAAABBQECAwUEBgYHBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tbW3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==');
+    const gameOverSound = new Audio('data:audio/wav;base64,UklGRkxuT19XQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVBvT18BAAUGCchxQDo2DQAEMx82OkJHaGlzdHx/goSGh4qPko2UnJ6eoKSorLC1uL+/xMnKzM/S1djb3uDi5err8fX5/f7/AQYKDQ8VHR8nLzU+REtUX2dtcX+BiIyUn6Swu8XOz9nc5uvx9f7/AQkOExgdKy85P0VPS1RZXV9kZ21xdnmBiYyQlpudpaivsLG3u7/DxMbHycvNz9HT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8ABQkNEhcaGiEkKS0xNjk+P0JFSEtPUFNVV1pbXl9iZWhqa3F3en+BhYqNkZWan6Clq6+zt7vBxMbOz9PV2t/i5err8PX4+vv//v8ABgkMDxITFBUXGBobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAAA');
+
+
+    const keys = {};
+    document.addEventListener("keydown", (e) => { if (gameActive) keys[e.key] = true; });
+    document.addEventListener("keyup", (e) => keys[e.key] = false);
+
+    function initGame() {
+      score = 0;
+      currentBearSize = BEAR_INITIAL_SIZE;
+      currentBearSpeedFactor = BEAR_INITIAL_SPEED_FACTOR;
+      lastBearOrientation = 1;
+
+      bear.style.width = currentBearSize + "px";
+      bear.style.height = currentBearSize + "px";
+      bear.style.opacity = '1';
+      bear.style.transform = 'scaleX(1) rotate(0deg)';
+      
+      bearX = game.clientWidth / 2 - currentBearSize / 2;
+      bearY = game.clientHeight / 2 - currentBearSize / 2;
+      bearTargetX = bearX; 
+      bearTargetY = bearY;
+      bear.style.left = bearX + "px";
+      bear.style.top = bearY + "px";
+
+      scoreText.textContent = `먹은 연어 수: ${score}`;
+      scoreText.style.transform = 'scale(1)';
+      statusText.style.display = "none";
+      restartButton.style.display = "none";
+
+      document.querySelectorAll(".salmon, .tiger").forEach(el => el.remove());
+      tigers = [];
+
+      [salmonInterval, timerInterval, tigerAppearTimeout, animationFrameId].forEach(id => {
+        if (id) {
+          if (String(id).includes('Timeout')) clearTimeout(id);
+          else if (String(id).includes('Interval')) clearInterval(id);
+          else cancelAnimationFrame(id);
+        }
+      });
+      
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+
+      salmonInterval = setInterval(createSalmon, SALMON_CREATION_INTERVAL);
+      tigerAppearTimeout = setTimeout(createTiger, TIGER_APPEAR_DELAY);
+      
+      gameActive = true;
+      gameLoop();
+    }
+
+    function updateTimer() {
+      if (!gameActive) return;
+      const elapsedTime = Date.now() - startTime;
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      timerText.textContent = `곰국이의 수명: ${minutes}분 ${seconds}초`;
+    }
+
+    function moveBear() {
+        if (!gameActive) return;
+
+        let targetOffsetX = 0;
+        let targetOffsetY = 0;
+
+        if (keys["ArrowUp"]) targetOffsetY -= BEAR_BASE_MOVE_AMOUNT;
+        if (keys["ArrowDown"]) targetOffsetY += BEAR_BASE_MOVE_AMOUNT;
+        if (keys["ArrowLeft"]) targetOffsetX -= BEAR_BASE_MOVE_AMOUNT;
+        if (keys["ArrowRight"]) targetOffsetX += BEAR_BASE_MOVE_AMOUNT;
+        
+        if (targetOffsetX !== 0 && targetOffsetY !== 0) {
+            targetOffsetX *= 0.7071;
+            targetOffsetY *= 0.7071;
+        }
+
+        bearTargetX = bearX + targetOffsetX;
+        bearTargetY = bearY + targetOffsetY;
+
+        let newBearX = bearX + (bearTargetX - bearX) * currentBearSpeedFactor;
+        let newBearY = bearY + (bearTargetY - bearY) * currentBearSpeedFactor;
+        
+        let rotation = 0;
+        let currentDx = newBearX - bearX;
+
+        if (currentDx > 0.1) {
+            rotation = 5;
+            lastBearOrientation = 1;
+        } else if (currentDx < -0.1) {
+            rotation = -5;
+            lastBearOrientation = -1;
+        } else {
+            rotation = 0;
+        }
+        bear.style.transform = `scaleX(${lastBearOrientation}) rotate(${rotation * lastBearOrientation}deg)`;
+
+
+        bearX = newBearX;
+        bearY = newBearY;
+
+        bearX = Math.max(0, Math.min(game.clientWidth - currentBearSize, bearX));
+        bearY = Math.max(0, Math.min(game.clientHeight - currentBearSize, bearY));
+        if (targetOffsetX === 0) bearTargetX = bearX;
+        if (targetOffsetY === 0) bearTargetY = bearY;
+
+
+        bear.style.left = bearX + "px";
+        bear.style.top = bearY + "px";
+    }
+
+
+    function createSalmon() {
+      if (!gameActive) return;
+      const currentSalmons = document.querySelectorAll(".salmon").length;
+      if (currentSalmons >= MAX_SALMONS) return;
+
+      const salmon = document.createElement("div");
+      salmon.classList.add("salmon");
+      salmon.style.width = SALMON_WIDTH + "px";
+      salmon.style.height = SALMON_HEIGHT + "px";
+      salmon.style.left = Math.random() * (game.clientWidth - SALMON_WIDTH) + "px";
+      salmon.style.top = Math.random() * (game.clientHeight - SALMON_HEIGHT) + "px";
+      game.insertBefore(salmon, bear);
+    }
+
+    function createTiger() {
+        if (!gameActive || tigers.length > 0) return;
+
+        const tigerEl = document.createElement("div");
+        tigerEl.classList.add("tiger");
+        const head = document.createElement("div");
+        head.classList.add("tiger-head");
+        ['left', 'right'].forEach(side => {
+            const eye = document.createElement("div");
+            eye.classList.add("tiger-eye", side);
+            head.appendChild(eye);
+        });
+        tigerEl.appendChild(head);
+        for (let i = 1; i <= 3; i++) {
+            const stripe = document.createElement("div");
+            stripe.classList.add("stripe", `stripe${i}`);
+            tigerEl.appendChild(stripe);
+        }
+
+        const edge = Math.floor(Math.random() * 4);
+        let startX, startY;
+        if (edge === 0) { startX = Math.random() * (game.clientWidth - TIGER_WIDTH); startY = -TIGER_HEIGHT - 10; }
+        else if (edge === 1) { startX = game.clientWidth + 10; startY = Math.random() * (game.clientHeight - TIGER_HEIGHT); }
+        else if (edge === 2) { startX = Math.random() * (game.clientWidth - TIGER_WIDTH); startY = game.clientHeight + 10; }
+        else { startX = -TIGER_WIDTH - 10; startY = Math.random() * (game.clientHeight - TIGER_HEIGHT); }
+
+        tigerEl.style.left = startX + "px";
+        tigerEl.style.top = startY + "px";
+        
+        game.appendChild(tigerEl);
+        const tigerData = { el: tigerEl, x: startX, y: startY };
+        tigers.push(tigerData);
+    }
+
+    function moveTigers() {
+        if (!gameActive) return;
+        tigers.forEach(tiger => {
+            const targetX = bearX + currentBearSize / 2 - TIGER_WIDTH / 2;
+            const targetY = bearY + currentBearSize / 2 - TIGER_HEIGHT / 2;
+
+            const dx = targetX - tiger.x;
+            const dy = targetY - tiger.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            let moveX = 0;
+            let moveY = 0;
+
+            if (distance > 1) {
+                moveX = dx * TIGER_CHASE_LERP_FACTOR;
+                moveY = dy * TIGER_CHASE_LERP_FACTOR;
+
+                const currentMoveDistance = Math.sqrt(moveX * moveX + moveY * moveY);
+                if (currentMoveDistance > TIGER_SPEED) {
+                    moveX = (moveX / currentMoveDistance) * TIGER_SPEED;
+                    moveY = (moveY / currentMoveDistance) * TIGER_SPEED;
+                }
+            }
+
+            tiger.x += moveX;
+            tiger.y += moveY;
+            
+            if (dx > 0.1) tiger.el.style.transform = 'scaleX(1)';
+            else if (dx < -0.1) tiger.el.style.transform = 'scaleX(-1)';
+
+            tiger.el.style.left = tiger.x + "px";
+            tiger.el.style.top = tiger.y + "px";
+        });
+    }
+
+    function checkCollisions() {
+      if (!gameActive) return;
+      const bRect = bear.getBoundingClientRect();
+
+      const salmons = document.querySelectorAll(".salmon");
+      salmons.forEach((salmon) => {
+        const sRect = salmon.getBoundingClientRect();
+        if (bRect.left < sRect.right && bRect.right > sRect.left &&
+            bRect.top < sRect.bottom && bRect.bottom > sRect.top) {
+          salmon.style.opacity = '0';
+          salmon.style.transform = 'scale(0.5)';
+          setTimeout(() => salmon.remove(), 200);
+          
+          score++;
+          scoreText.textContent = `먹은 연어 수: ${score}`;
+          scoreText.style.transform = 'scale(1.2)';
+          setTimeout(() => scoreText.style.transform = 'scale(1)', 150);
+
+          if (eatSound.readyState >= 2) { eatSound.currentTime = 0; eatSound.play(); }
+          updateBear();
+        }
+      });
+
+      tigers.forEach(tiger => {
+          const tRect = tiger.el.getBoundingClientRect();
+          const collisionPadding = 5; 
+          if (bRect.left < tRect.right - collisionPadding && 
+              bRect.right > tRect.left + collisionPadding &&
+              bRect.top < tRect.bottom - collisionPadding && 
+              bRect.bottom > tRect.top + collisionPadding) {
+              gameOver("호랑이에게 잡혔어요!");
+              tiger.el.style.transition = 'left 0.5s ease-in-out, top 0.5s ease-in-out, transform 0.5s ease-in-out';
+              tiger.el.style.left = (bRect.left + bRect.width / 2 - TIGER_WIDTH / 2) + "px";
+              tiger.el.style.top = (bRect.top + bRect.height / 2 - TIGER_HEIGHT / 2) + "px";
+              bear.style.opacity = '0';
+              setTimeout(() => {
+                let currentTransform = tiger.el.style.transform || '';
+                if (currentTransform.includes('scaleX(-1)')) {
+                    tiger.el.style.transform = 'scaleX(-1) scale(1.3)';
+                } else {
+                    tiger.el.style.transform = 'scale(1.3)';
+                }
+              }, 300);
+          }
+      });
+    }
+
+    function updateBear() {
+      let newSize = currentBearSize;
+      let newSpeedFactor = currentBearSpeedFactor;
+      let leveledUp = false;
+
+      if (score >= SCORE_TO_LARGE && currentBearSize < BEAR_LARGE_SIZE) {
+        newSize = BEAR_LARGE_SIZE; newSpeedFactor = BEAR_INITIAL_SPEED_FACTOR * 1.25; leveledUp = true; // 성장 시 속도 조금 더 빠르게
+      } else if (score >= SCORE_TO_MID && currentBearSize < BEAR_MID_SIZE) {
+        newSize = BEAR_MID_SIZE; newSpeedFactor = BEAR_INITIAL_SPEED_FACTOR * 1.1; leveledUp = true;
+      }
+
+      if (leveledUp) {
+        const sizeDiff = newSize - currentBearSize;
+        bearX -= sizeDiff / 2;
+        bearY -= sizeDiff / 2;
+        bearTargetX = bearX;
+        bearTargetY = bearY;
+
+        currentBearSize = newSize;
+        currentBearSpeedFactor = newSpeedFactor;
+
+        bear.style.width = currentBearSize + "px";
+        bear.style.height = currentBearSize + "px";
+        if (levelUpSound.readyState >= 2) { levelUpSound.currentTime = 0; levelUpSound.play(); }
+      }
+
+      if (score >= SCORE_TO_WIN && gameActive) {
+        gameOver("🎉 훌륭한 곰으로 성장했어요! 🎉", true);
+      }
+    }
+    
+    function gameOver(message, isWin = false) {
+        if (!gameActive) return;
+        gameActive = false;
+
+        statusText.textContent = message;
+        statusText.style.display = "block";
+        restartButton.style.display = "block";
+
+        if (!isWin && gameOverSound.readyState >= 2) { gameOverSound.currentTime = 0; gameOverSound.play(); }
+        else if (isWin && levelUpSound.readyState >=2) { levelUpSound.currentTime = 0; levelUpSound.play(); }
+
+        clearInterval(salmonInterval); salmonInterval = null;
+        clearInterval(timerInterval); timerInterval = null;
+        clearTimeout(tigerAppearTimeout); tigerAppearTimeout = null;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    function gameLoop() {
+      if (!gameActive) return;
+      moveBear();
+      moveTigers();
+      checkCollisions();
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    restartButton.addEventListener("click", initGame);
+    
+    const preloadImage = new Image();
+    preloadImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDUwIDgwIj48ZyBmaWxsPSIjM0FCODAwIj48cGF0aCBkPSJNMjUgMEwzMCA1MEwxNSA1MFoyNSIvPjxwYXRoIGQ9Ik0yNSAwTDQ1IDIwTDQwIDUwTDMwIDUwWiIvPjxwYXRoIGQ9Ik0yNSAwTDUgMjBMMTAgNTBMMjAgNTBaIi8+PHJlY3QgeD0iMjIiIHk9IjUwIiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iIzZCNTQzMSIvPjwvZz48L3N2Zz4=';
+    
+    // 사운드 로드 시도 (선택적, 모바일 환경 등에서 자동 재생 문제 방지)
+    function loadSounds() {
+        eatSound.load();
+        levelUpSound.load();
+        gameOverSound.load();
+    }
+
+    if (preloadImage.complete) {
+        loadSounds();
+        initGame();
+    } else {
+        preloadImage.onload = () => {
+            loadSounds();
+            initGame();
+        };
+    }
+
+  </script>
+</body>
+</html>
